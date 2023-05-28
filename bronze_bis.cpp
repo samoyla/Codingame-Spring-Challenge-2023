@@ -130,8 +130,12 @@ int main()
             for(int i = 0; i != crist.size(); ++i)
                 output += "LINE " + to_string(my_bases) + " " + to_string(crist[i]) + " " + to_string(str_crist) + ";"; 
         }
+		else
+			output = "WAIT";
+			
         cout << output;
         cout << endl;
+		
         // Write an action using cout. DON'T FORGET THE "<< endl"
         // To debug: cerr << "Debug messages..." << endl;
 

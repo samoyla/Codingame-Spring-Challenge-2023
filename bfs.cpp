@@ -30,53 +30,174 @@ class Cell {
        // ~Cell();
 };
 
-
-class Graph{
-	int V; //number_of_cells
-	vector<list<int>> adj; //cells[i].neigbors;
-	public:
-	Graph(int V);
-	void addEdge(int v, int w);
-	void BFS(int s);
-	};
-	
-	Graph::Graph(int V): V(V){
-		adj.resize(V);
-	}
-
-	//a quoi correspond int v ?
-	void Graph::addEdge(int v, int w){
-		adj[v].push_back(w);
-	}
-	
-	// s = my_base_index
-	void Graph::BFS(int s){
+	vector<int> BFS_dist(vector<Cell> &cells,int from, int to){
+		int nb_cells = cells.size();
 		vector <bool> visited;
-		visited.resize(V, false);
-		//vector<int> unvisited(V);
-		list<int> stock;
-		//vector <int> distances;
+		visited.resize(nb_cells, false);
 
-		// for(int i = 0; i < V; ++i){
-		// 	unvisited[i] = i;
-		// }
+		vector<int> unvisited(nb_cells);
+		for(int i = 0; i < nb_cells; ++i){
+			unvisited[i] = i;
+		}
 
+		vector<int> distances(nb_cells, numeric_limits<int>::max());
+		vector<int> prev_node(nb_cells, -1);
+		distances[from] = 0;
 
-		visited[s] = true;
-		stock.push_back(s);
+		while(!unvisited.empty()){
+			//shortest unvisited distance
+			int minDist = numeric_limits<int>::max();
+			int min_i = -1;
+		
+			for(vector<int>::iterator it = unvisited.begin(); it != unvisited.end(); ++it){
+				int c = *it;
+				if(distances[c] < minDist){
+					min_i = c;
+					minDist = distances[c];
+				}
+			}
 
-		while(!stock.empty()){
-			s = stock.front();
-			cerr << s << " ";
-			stock.pop_front();
+			int current = min_i;
+			visited[current] = true;
 
-			for(int i = 0; i != adj.size(); ++i){
-				if(!visited[i]){
-					visited[i] = true;
-					stock.push_back(i);
+			if(current == to)
+				break;//we are in the right place
+
+			unvisited.erase(find(unvisited.begin(), unvisited.end(), current));
+
+            int next_distance = distances[current] + 1;
+
+			for(vector<int>::iterator it = cells[current].neighbors.begin(); it != cells[current].neighbors.end(); ++it){
+				int v = *it;
+				if(!visited[v]){
+					if (distances[v] > next_distance){
+						distances[v] = next_distance;
+						prev_node[v] = current;
+					}
 				}
 			}
 		}
+		vector<int> paths;
+		paths.push_back(to);
+		int curr= prev_node[to];
+		while(curr != -1){
+			paths.push_back(curr);
+			curr = prev_node[curr];
+		}
+
+		reverse(paths.begin(), paths.end());
+
+		return paths;
+	}
+
+	vector<int> find_eggs(vector<Cell> &cells, int from){
+		int nb_cells = cells.size();
+		vector <bool> visited;
+		visited.resize(nb_cells, false);
+
+		vector<int> unvisited(nb_cells);
+		for(int i = 0; i < nb_cells; ++i){
+			unvisited[i] = i;
+		}
+
+		vector<int> distances(nb_cells, numeric_limits<int>::max());
+		vector<int> prev_node(nb_cells, -1);
+		distances[from] = 0;
+
+		vector<int> eggs;
+
+		while(!unvisited.empty()){
+			//shortest unvisited distance
+			int minDist = numeric_limits<int>::max();
+			int min_i = -1;
+		
+			for(vector<int>::iterator it = unvisited.begin(); it != unvisited.end(); ++it){
+				int a = *it;
+				if(distances[a] < minDist){
+					min_i = a;
+					minDist = distances[a];
+				}
+			}
+			if (min_i < 0){
+				cerr<< "ERR" << min_i << endl;
+				break;
+			}
+
+			int current = min_i;
+			visited[current] = true;
+
+			if(cells[current].cell_type == 1)
+				eggs.push_back(current);
+			
+			unvisited.erase(find(unvisited.begin(), unvisited.end(), current));
+
+			int next_distance = distances[current] + 1;
+
+			for(vector<int>::iterator it = cells[current].neighbors.begin(); it != cells[current].neighbors.end(); ++it){
+				int b = *it;
+				if(!visited[b]){
+					if (distances[b] > next_distance){
+						distances[b] = next_distance;
+					}
+				}
+			}
+		}
+		return eggs;
+	}
+		
+	vector<int> find_crist(vector<Cell> &cells, int from){
+		int nb_cells = cells.size();
+		vector <bool> visited;
+		visited.resize(nb_cells, false);
+
+		vector<int> unvisited(nb_cells);
+		for(int i = 0; i < nb_cells; ++i){
+			unvisited[i] = i;
+		}
+
+		vector<int> distances(nb_cells, numeric_limits<int>::max());
+		vector<int> prev_node(nb_cells, -1);
+		distances[from] = 0;
+
+		vector<int> crist;
+
+		while(!unvisited.empty()){
+			//shortest unvisited distance
+			int minDist = numeric_limits<int>::max();
+			int min_i = -1;
+		
+			for(vector<int>::iterator it = unvisited.begin(); it != unvisited.end(); ++it){
+				int a = *it;
+				if(distances[a] < minDist){
+					min_i = a;
+					minDist = distances[a];
+				}
+			}
+			if (min_i < 0){
+				cerr<< "ERR" << min_i << endl;
+				break;
+			}
+
+			int current = min_i;
+			visited[current] = true;
+
+			if(cells[current].cell_type == 2)
+				crist.push_back(current);
+			
+			unvisited.erase(find(unvisited.begin(), unvisited.end(), current));
+
+			int next_distance = distances[current] + 1;
+
+			for(vector<int>::iterator it = cells[current].neighbors.begin(); it != cells[current].neighbors.end(); ++it){
+				int b = *it;
+				if(!visited[b]){
+					if (distances[b] > next_distance){
+						distances[b] = next_distance;
+					}
+				}
+			}
+		}
+		return crist;
 	}
 
 int main()
@@ -119,17 +240,20 @@ int main()
     }
     while (1) {
         
-        vector<int> eggs;
-        // for(int i =0; i != number_of_cells; ++i ){
-        //     if(cells[i].cell_type == 1)
-        //         eggs.push_back(cells[i].index);
-        // }
+        vector<int> eggs = find_eggs(cells, my_base);
+		for (std::vector<int>::iterator it = eggs.begin(); it != eggs.end(); ++it)
+        	std::cerr << *it << " ";
+    	std::cerr << std::endl;
     
-        vector<int> crist;
-        // for(int i = 0; i != number_of_cells; ++i){
-        //     if(cells[i].cell_type == 2)
-        //         crist.push_back(cells[i].index);
-        // }
+        vector<int> crist = find_crist(cells, my_base);
+		for (std::vector<int>::iterator it = crist.begin(); it != crist.end(); ++it)
+        	std::cerr << *it << " ";
+    	std::cerr << std::endl;
+
+		vector<int> paths = BFS_dist(cells, my_base, opp_base);
+		for (std::vector<int>::iterator it = paths.begin(); it != paths.end(); ++it)
+			std::cerr << *it << " ";
+		std::cerr << std::endl;
 
         int nb_my_ants = 0;
         int nb_opp_ants = 0;
@@ -144,21 +268,12 @@ int main()
             nb_my_ants += my_ants;
             nb_opp_ants += opp_ants;
 
-            if(cells[i].cell_type == 1 && resources > 0)
-                eggs.push_back(cells[i].index);
+            // if(cells[i].cell_type == 1 && resources > 0)
+            //     eggs.push_back(cells[i].index);
 
-            if(cells[i].cell_type == 2 && resources > 0)
-                crist.push_back(cells[i].index);
-        }
-	
-		Graph g(number_of_cells);
-		for(int i = 0; i != number_of_cells; ++i){
-			for (int j = 0; j != cells[i].neighbors.size(); ++j){
-				g.addEdge(cells[i].index, cells[i].neighbors[j]);
-			}
-		}
-		g.BFS(my_base);
-	
+            // if(cells[i].cell_type == 2 && resources > 0)
+            //     crist.push_back(cells[i].index);
+        }	
 
         // int str_egg = 0; 
         // int str_crist = 0;
