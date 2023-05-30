@@ -211,7 +211,7 @@ int main()
         opp_base = opp_base_index;
     }
         
-		while (1) {
+while (1) {
     vector<vector<int>> all_res_paths = find_targets(cells, my_base);
     vector<vector<int>> egg_paths = find_targets(cells, my_base, 1);
     vector<vector<int>> crist_paths = find_targets(cells, my_base, 2);
