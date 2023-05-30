@@ -10,9 +10,9 @@ using namespace std;
  * Auto-generated code below aims at helping you parse
  * the standard input according to the problem statement.
  **/
-#include <vector>
 #include <list>
 #include <map>
+#include <queue>
 
 class Cell {
     public:
@@ -30,178 +30,181 @@ class Cell {
        // ~Cell();
 };
 
-	vector<int> BFS_dist(vector<Cell> &cells,int from, int to){
-		int nb_cells = cells.size();
-		vector <bool> visited;
-		visited.resize(nb_cells, false);
+vector<int> BFS_dist(vector<Cell> &cells,int from, int to){
+	int nb_cells = cells.size();
+	vector <bool> visited;
+	visited.resize(nb_cells, false);
 
-		vector<int> unvisited(nb_cells);
-		for(int i = 0; i < nb_cells; ++i){
-			unvisited[i] = i;
-		}
-
-		vector<int> distances(nb_cells, numeric_limits<int>::max());
-		vector<int> prev_node(nb_cells, -1);
-		distances[from] = 0;
-
-		while(!unvisited.empty()){
-			//shortest unvisited distance
-			int minDist = numeric_limits<int>::max();
-			int min_i = -1;
-		
-			for(vector<int>::iterator it = unvisited.begin(); it != unvisited.end(); ++it){
-				int c = *it;
-				if(distances[c] < minDist){
-					min_i = c;
-					minDist = distances[c];
-				}
-			}
-
-			int current = min_i;
-			visited[current] = true;
-
-			if(current == to)
-				break;//we are in the right place
-
-			unvisited.erase(find(unvisited.begin(), unvisited.end(), current));
-
-            int next_distance = distances[current] + 1;
-
-			for(vector<int>::iterator it = cells[current].neighbors.begin(); it != cells[current].neighbors.end(); ++it){
-				int v = *it;
-				if(!visited[v]){
-					if (distances[v] > next_distance){
-						distances[v] = next_distance;
-						prev_node[v] = current;
-					}
-				}
-			}
-		}
-		vector<int> paths;
-		paths.push_back(to);
-		int curr= prev_node[to];
-		while(curr != -1){
-			paths.push_back(curr);
-			curr = prev_node[curr];
-		}
-
-		reverse(paths.begin(), paths.end());
-
-		return paths;
+	vector<int> unvisited(nb_cells);
+	for(int i = 0; i < nb_cells; ++i){
+		unvisited[i] = i;
 	}
 
-	vector<int> find_eggs(vector<Cell> &cells, int from){
-		int nb_cells = cells.size();
-		vector <bool> visited;
-		visited.resize(nb_cells, false);
+	vector<int> distances(nb_cells, numeric_limits<int>::max());
+	vector<int> prev_node(nb_cells, -1);
+	distances[from] = 0;
 
-		vector<int> unvisited(nb_cells);
-		for(int i = 0; i < nb_cells; ++i){
-			unvisited[i] = i;
+	while(!unvisited.empty()){
+		//shortest unvisited distance
+		int minDist = numeric_limits<int>::max();
+		int min_i = -1;
+	
+		for(vector<int>::iterator it = unvisited.begin(); it != unvisited.end(); ++it){
+			int c = *it;
+			if(distances[c] < minDist){
+				min_i = c;
+				minDist = distances[c];
+			}
 		}
 
-		vector<int> distances(nb_cells, numeric_limits<int>::max());
-		vector<int> prev_node(nb_cells, -1);
-		distances[from] = 0;
+		int current = min_i;
+		visited[current] = true;
 
-		vector<int> eggs;
+		if(current == to)
+			break;//we are in the right place
 
-		while(!unvisited.empty()){
-			//shortest unvisited distance
-			int minDist = numeric_limits<int>::max();
-			int min_i = -1;
-		
-			for(vector<int>::iterator it = unvisited.begin(); it != unvisited.end(); ++it){
-				int a = *it;
-				if(distances[a] < minDist){
-					min_i = a;
-					minDist = distances[a];
-				}
-			}
-			if (min_i < 0){
-				cerr<< "ERR" << min_i << endl;
-				break;
-			}
+		unvisited.erase(find(unvisited.begin(), unvisited.end(), current));
 
-			int current = min_i;
-			visited[current] = true;
+		int next_distance = distances[current] + 1;
 
-			if(cells[current].cell_type == 1)
-				eggs.push_back(current);
-			
-			unvisited.erase(find(unvisited.begin(), unvisited.end(), current));
-
-			int next_distance = distances[current] + 1;
-
-			for(vector<int>::iterator it = cells[current].neighbors.begin(); it != cells[current].neighbors.end(); ++it){
-				int b = *it;
-				if(!visited[b]){
-					if (distances[b] > next_distance){
-						distances[b] = next_distance;
-					}
+		for(vector<int>::iterator it = cells[current].neighbors.begin(); it != cells[current].neighbors.end(); ++it){
+			int v = *it;
+			if(!visited[v]){
+				if (distances[v] > next_distance){
+					distances[v] = next_distance;
+					prev_node[v] = current;
 				}
 			}
 		}
-		return eggs;
 	}
-		
-	vector<int> find_crist(vector<Cell> &cells, int from){
-		int nb_cells = cells.size();
-		vector <bool> visited;
-		visited.resize(nb_cells, false);
-
-		vector<int> unvisited(nb_cells);
-		for(int i = 0; i < nb_cells; ++i){
-			unvisited[i] = i;
-		}
-
-		vector<int> distances(nb_cells, numeric_limits<int>::max());
-		vector<int> prev_node(nb_cells, -1);
-		distances[from] = 0;
-
-		vector<int> crist;
-
-		while(!unvisited.empty()){
-			//shortest unvisited distance
-			int minDist = numeric_limits<int>::max();
-			int min_i = -1;
-		
-			for(vector<int>::iterator it = unvisited.begin(); it != unvisited.end(); ++it){
-				int a = *it;
-				if(distances[a] < minDist){
-					min_i = a;
-					minDist = distances[a];
-				}
-			}
-			if (min_i < 0){
-				cerr<< "ERR" << min_i << endl;
-				break;
-			}
-
-			int current = min_i;
-			visited[current] = true;
-
-			if(cells[current].cell_type == 2)
-				crist.push_back(current);
-			
-			unvisited.erase(find(unvisited.begin(), unvisited.end(), current));
-
-			int next_distance = distances[current] + 1;
-
-			for(vector<int>::iterator it = cells[current].neighbors.begin(); it != cells[current].neighbors.end(); ++it){
-				int b = *it;
-				if(!visited[b]){
-					if (distances[b] > next_distance){
-						distances[b] = next_distance;
-					}
-				}
-			}
-		}
-		return crist;
+	vector<int> paths;
+	paths.push_back(to);
+	int curr= prev_node[to];
+	while(curr != -1){
+		paths.push_back(curr);
+		curr = prev_node[curr];
 	}
+
+	reverse(paths.begin(), paths.end());
+
+	return paths;
+}
+
+vector<int> find_eggs(vector<Cell> &cells, int from){
+	int nb_cells = cells.size();
+	vector <bool> visited;
+	visited.resize(nb_cells, false);
+
+	vector<int> unvisited(nb_cells);
+	for(int i = 0; i < nb_cells; ++i){
+		unvisited[i] = i;
+	}
+
+	vector<int> distances(nb_cells, numeric_limits<int>::max());
+	vector<int> prev_node(nb_cells, -1);
+	distances[from] = 0;
+
+	vector<int> eggs;
+
+	while(!unvisited.empty()){
+		//shortest unvisited distance
+		int minDist = numeric_limits<int>::max();
+		int min_i = -1;
+	
+		for(vector<int>::iterator it = unvisited.begin(); it != unvisited.end(); ++it){
+			int a = *it;
+			if(distances[a] < minDist){
+				min_i = a;
+				minDist = distances[a];
+			}
+		}
+		if (min_i < 0){
+			cerr<< "ERR" << min_i << endl;
+			break;
+		}
+
+		int current = min_i;
+		visited[current] = true;
+
+		if(cells[current].cell_type == 1)
+			eggs.push_back(current);
+		
+		unvisited.erase(find(unvisited.begin(), unvisited.end(), current));
+
+		int next_distance = distances[current] + 1;
+
+		for(vector<int>::iterator it = cells[current].neighbors.begin(); it != cells[current].neighbors.end(); ++it){
+			int b = *it;
+			if(!visited[b]){
+				if (distances[b] > next_distance){
+					distances[b] = next_distance;
+				}
+			}
+		}
+	}
+	return eggs;
+}
+	
+vector<int> find_crist(vector<Cell> &cells, int from){
+	int nb_cells = cells.size();
+	vector <bool> visited;
+	visited.resize(nb_cells, false);
+
+	vector<int> unvisited(nb_cells);
+	for(int i = 0; i < nb_cells; ++i){
+		unvisited[i] = i;
+	}
+
+	vector<int> distances(nb_cells, numeric_limits<int>::max());
+	vector<int> prev_node(nb_cells, -1);
+	distances[from] = 0;
+
+	vector<int> crist;
+    //for (std::vector<int>::iterator it = distances.begin(); it != distances.end(); ++it)
+	//	std::cerr << *it << " ";
+	//std::cerr << std::endl;
+	while(!unvisited.empty()){
+		//shortest unvisited distance
+		int minDist = numeric_limits<int>::max();
+		int min_i = -1;
+	
+		for(vector<int>::iterator it = unvisited.begin(); it != unvisited.end(); ++it){
+			int a = *it;       
+			if(distances[a] < minDist){
+				min_i = a;
+				minDist = distances[a];
+			}
+		}
+		if (min_i < 0){
+			cerr<< "ERR" << min_i << endl;
+			break;
+		}
+
+		int current = min_i;
+		visited[current] = true;
+
+		if(cells[current].cell_type == 2)
+			crist.push_back(current);
+		
+		unvisited.erase(find(unvisited.begin(), unvisited.end(), current));
+
+		int next_distance = distances[current] + 1;
+
+		for(vector<int>::iterator it = cells[current].neighbors.begin(); it != cells[current].neighbors.end(); ++it){
+			int b = *it;
+			if(!visited[b]){
+				if (distances[b] > next_distance){
+					distances[b] = next_distance;
+				}
+			}
+		}
+	}
+	return crist;
+}
 
 int main()
 {
+	//coucou
     vector<Cell> cells;
     int number_of_cells; // amount of hexagonal cells in this map
     cin >> number_of_cells; cin.ignore();
@@ -241,19 +244,20 @@ int main()
     while (1) {
         
         vector<int> eggs = find_eggs(cells, my_base);
-		for (std::vector<int>::iterator it = eggs.begin(); it != eggs.end(); ++it)
-        	std::cerr << *it << " ";
-    	std::cerr << std::endl;
+		// for (std::vector<int>::iterator it = eggs.begin(); it != eggs.end(); ++it)
+        // 	std::cerr << *it << " ";
+    	// std::cerr << std::endl;
     
         vector<int> crist = find_crist(cells, my_base);
-		for (std::vector<int>::iterator it = crist.begin(); it != crist.end(); ++it)
-        	std::cerr << *it << " ";
-    	std::cerr << std::endl;
+		// for (std::vector<int>::iterator it = crist.begin(); it != crist.end(); ++it)
+        // 	std::cerr << *it << " ";
+    	// std::cerr << std::endl;
 
-		vector<int> paths = BFS_dist(cells, my_base, opp_base);
-		for (std::vector<int>::iterator it = paths.begin(); it != paths.end(); ++it)
-			std::cerr << *it << " ";
-		std::cerr << std::endl;
+		 //vector<int> paths = BFS_dist(cells, my_base, opp_base);
+		
+		 //for (std::vector<int>::iterator it = paths.begin(); it != paths.end(); ++it)
+		 //	std::cerr << *it << " ";
+		// std::cerr << std::endl;
 
         int nb_my_ants = 0;
         int nb_opp_ants = 0;
@@ -263,6 +267,8 @@ int main()
             int my_ants; // the amount of your ants on this cell
             int opp_ants; // the amount of opponent ants on this cell
             cin >> resources >> my_ants >> opp_ants; cin.ignore();
+
+			//cerr << "resources : " << resources << endl;
 
             cells[i].resources = resources;
             nb_my_ants += my_ants;
@@ -274,38 +280,71 @@ int main()
             // if(cells[i].cell_type == 2 && resources > 0)
             //     crist.push_back(cells[i].index);
         }	
+		// vector<int> closest_eggs;
+		// for (vector<int>::iterator it = eggs.begin(); it ; ++it)
+		// 	closest_eggs.push_back(*it);
 
-        // int str_egg = 0; 
-        // int str_crist = 0;
+		// for(vector<int>::iterator it = closest_eggs.begin(); it != closest_eggs.end(); ++it)
+		// 	cerr << *it << " " << endl;
+		// cerr << endl;
 
-        // if(nb_my_ants < 25)
-        // {
-        //     str_egg = 3;
-        //     str_crist = 0;
-        // }
-        // else if( nb_opp_ants - nb_my_ants > 5)
-        // {
-        //     str_egg = 2;
-        //     str_crist = 1;
-        // }
-        // else
-        // {
-        //     str_egg = 3;
-        //     str_crist = 1;
-        // }
-        // string output;
-        // if(str_egg > 0)
-        // {
-        //     for(int i = 0; i != eggs.size(); ++i)
-        //         output += "LINE " + to_string(my_bases) + " " + to_string(eggs[i]) + " " + to_string(str_egg) + ";"; 
-        // }
-        // if(str_crist > 0)
-        // {
-        //     for(int i = 0; i != crist.size(); ++i)
-        //         output += "LINE " + to_string(my_bases) + " " + to_string(crist[i]) + " " + to_string(str_crist) + ";"; 
-        // }
+
+		Cell& base_cell = cells[my_base];
+		vector<int> neighbor_indices;
+		for (int neighbor_index : base_cell.neighbors) {
+			neighbor_indices.push_back(neighbor_index);
+		}
+
+		//cerr << "Indices of neighbors of my_base: ";
+		//for (int neighbor_index : neighbor_indices) {
+		//	cerr << neighbor_index << " ";
+		//}
+		//cerr << endl;
+
+		int str_egg = 0; 
+		int str_crist = 0;
+		if (nb_my_ants < 25) {
+			int type2 = 0;
+			for (int neighbor_index : cells[my_base].neighbors) {
+				if (cells[neighbor_index].cell_type == 2) {
+					type2++;
+				}
+			}
+			if (type2 > 0) {
+				str_egg = 3;
+				str_crist = 1;
+			} else {
+				str_egg = 3;
+				str_crist = 0;
+			}
+		} else {
+			str_egg = 3;
+			str_crist = 4;
+		}
+		
+ 		string output;
+		
+        if(str_egg > 0)
+        {
+            for(int i = 0; i != eggs.size(); ++i)
+                output += "LINE " + to_string(my_base) + " " + to_string(eggs[i]) + " " + to_string(str_egg) + ";"; 
+        }
+        if(str_crist > 0)
+        {
+            for(int i = 0; i != crist.size(); ++i)
+               output += "LINE " + to_string(my_base) + " " + to_string(crist[i]) + " " + to_string(str_crist) + ";"; 
+        }
+
+		Graph g(number_of_cells);
+		for(int i = 0; i != number_of_cells; ++i){
+			for (int j = 0; j != cells[i].neighbors.size(); ++j){
+				g.addEdge(cells[i].index, cells[i].neighbors[j]);
+			}
+		}
+		g.BFS(my_base);	
+
         //cout << output;
-		cout << "WAIT";
+		//cout << "WAIT";
         cout << endl;
         // Write an action using cout. DON'T FORGET THE "<< endl"
         // To debug: cerr << "Debug messages..." << endl;
