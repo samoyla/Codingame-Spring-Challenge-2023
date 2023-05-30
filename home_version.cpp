@@ -172,6 +172,21 @@ vector<vector<int>> find_targets(const vector<Cell>& cells, int from, int target
     return all_targets;
 }
 
+void placeBeaconForEggs(int cell_index) {
+    Cell& cell = cells[cell_index];
+    int target_index = -1;
+    for (int neighbor_index : cell.neighbors) {
+        if (cells[neighbor_index].cell_type == 1) {
+            target_index = neighbor_index;
+            break;
+        }
+    }
+    if (target_index != -1) {
+        output += "BEACON " + to_string(target_index) + " " + to_string(str_egg) + ";";
+    }
+}
+
+
 int main()
 {
     vector<Cell> cells;
@@ -210,7 +225,9 @@ int main()
         cin >> opp_base_index; cin.ignore();
         opp_base = opp_base_index;
     }
-        
+   
+
+	
 while (1) {
     vector<vector<int>> all_res_paths = find_targets(cells, my_base);
     vector<vector<int>> egg_paths = find_targets(cells, my_base, 1);
@@ -276,6 +293,19 @@ for (const auto& path : egg_paths) {
     }
 }
 
+// Place beacons for eggs if neighbors contain crystals
+if (beacons_placed < nb_my_ants / 2) {
+	for (int neighbor_index : neighbor_indices) {
+	    if (cells[neighbor_index].cell_type == 2) {
+		placeBeaconForEggs(neighbor_index);
+		beacons_placed++;
+		if (beacons_placed >= nb_my_ants / 2) {
+		    break;
+		}
+	    }
+	}
+}
+	
 // Phase 2: Collecting eggs and crystals
 for (int iteration = 0; iteration < 3; ++iteration) {
     vector<vector<int>> targets;
