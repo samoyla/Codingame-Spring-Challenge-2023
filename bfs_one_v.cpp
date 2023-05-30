@@ -45,7 +45,6 @@ vector<int> BFS_shortest_path(const vector<Cell>& cells, int start, int target) 
         q.pop();
 
         if (current == target) {
-            // Reconstruct the path
             vector<int> path;
             while (current != -1) {
                 path.insert(path.begin(), current);
@@ -67,9 +66,58 @@ vector<int> BFS_shortest_path(const vector<Cell>& cells, int start, int target) 
             }
         }
     }
-
-    // No path found
     return vector<int>();
+}
+
+//return all the sources in one vector
+vector<vector<int>> find_targets(const vector<Cell>& cells, int from) {
+    int nb_cells = cells.size();
+    vector<bool> visited(nb_cells, false);
+    vector<int> unvisited(nb_cells);
+    for (int i = 0; i < nb_cells; ++i) {
+        unvisited[i] = i;
+    }
+    vector<int> distances(nb_cells, numeric_limits<int>::max());
+    vector<int> prev_node(nb_cells, -1);
+    distances[from] = 0;
+
+    vector<vector<int>> all_targets;
+
+    while (!unvisited.empty()) {
+        int minDist = numeric_limits<int>::max();
+        int min_i = -1;
+
+        for (int a : unvisited) {
+            if (distances[a] < minDist) {
+                min_i = a;
+                minDist = distances[a];
+            }
+        }
+
+        int current = min_i;
+        visited[current] = true;
+
+        unvisited.erase(find(unvisited.begin(), unvisited.end(), current));
+
+        if (cells[current].cell_type == 1 || cells[current].cell_type == 2) {
+            vector<int> path = BFS_shortest_path(cells, from, current);
+            if (!path.empty()) {
+                all_targets.push_back(path);
+            }
+        }
+
+        int next_distance = distances[current] + 1;
+
+        for (int v : cells[current].neighbors) {
+            if (!visited[v]) {
+                if (distances[v] > next_distance) {
+                    distances[v] = next_distance;
+                    prev_node[v] = current;
+                }
+            }
+        }
+    }
+    return all_targets;
 }
 
 //replace two functions :find_eggs and find_crist
@@ -103,7 +151,6 @@ vector<vector<int>> find_targets(const vector<Cell>& cells, int from, int target
         unvisited.erase(find(unvisited.begin(), unvisited.end(), current));
 
         if (cells[current].cell_type == target_type) {
-            // Found a target
             vector<int> path = BFS_shortest_path(cells, from, current);
             if (!path.empty()) {
                 all_targets.push_back(path);
@@ -163,8 +210,18 @@ int main()
         cin >> opp_base_index; cin.ignore();
         opp_base = opp_base_index;
     }
+
     while (1) {
         
+		vector<vector<int>> all_res_paths = find_targets(cells, my_base);
+		// cerr << "ALL resources Paths:" << endl;
+		// for (const auto& path : all_res_paths) {
+		// 	for (const auto& cell : path) {
+		// 		cerr << cell << " ";
+		// 	}
+		// 	cerr << endl;
+		// }
+
 		vector<vector<int>> egg_paths = find_targets(cells, my_base, 1);
 		// cerr << "Egg Paths:" << endl;
 		// for (const auto& path : egg_paths) {
@@ -182,12 +239,6 @@ int main()
 		// 	}
 		// 	cerr << endl;
 		// }
-
-		// vector<int> path = BFS_shortest_path(cells, my_base, opp_base);
-		// cerr << "shortest Paths between two bases:" << endl;
-		// for(vector<int>::iterator it = path.begin(); it != path.end(); ++it)
-		// 	cerr << *it << " ";
-		// cerr << endl;
 
         int nb_my_ants = 0;
         int nb_opp_ants = 0;
@@ -241,25 +292,23 @@ int main()
 		
  		string output;
 		
-		if (str_egg > 0) {
+		// for (const auto& path : all_res_paths) {
+		// 	// int t_size = 0;
+		// 	// t_size += path.size();
+		// 	// if(t_size > nb_my_ants/2)
+		// 	// 	break ;
+		// 	for (int i = 1; i < path.size(); ++i) {
+		// 		output += "LINE " + to_string(path[i - 1]) + " " + to_string(path[i]) + " " + to_string(1) + ";";
+		// 	}
+		// }
+
+		if (str_crist > 0) {
 			for (const auto& path : crist_paths) {
-				int t_size = 0;
-				t_size += path.size();
-				if(t_size > nb_my_ants/2)
-					break ;
 				for (int i = 1; i < path.size(); ++i) {
-					output += "LINE " + to_string(path[i - 1]) + " " + to_string(path[i]) + " " + to_string(str_egg) + ";";
+					output += "LINE " + to_string(path[i - 1]) + " " + to_string(path[i]) + " " + to_string(str_crist) + ";";
 				}
 			}
 		}
-
-		// if (str_crist > 0) {
-		// 	for (const auto& path : crist_paths) {
-		// 		for (int i = 1; i < path.size(); ++i) {
-		// 			output += "LINE " + to_string(path[i - 1]) + " " + to_string(path[i]) + " " + to_string(str_crist) + ";";
-		// 		}
-		// 	}
-		// }
 
 		// if (str_egg > 0) {
 		// 	for (const auto& path : egg_paths) {
@@ -269,25 +318,21 @@ int main()
 		// 	}
 		// }
 
-		// if (str_crist > 0) {
-		// 	for (const auto& path : crist_paths) {
-		// 		for (int i = 1; i < path.size(); ++i) {
-		// 			output += "LINE " + to_string(path[i - 1]) + " " + to_string(path[i]) + " " + to_string(str_crist) + ";";
-		// 		}
-		// 	}
-		// }
+		if (str_egg > 0) {
+			for (const auto& path : egg_paths) {
+				for (int i = 1; i < path.size(); ++i) {
+					output += "LINE " + to_string(path[i - 1]) + " " + to_string(path[i]) + " " + to_string(str_crist) + ";";
+				}
+			}
+		}
 
-        cout << output;
+		cout << output;
 		//cout << "WAIT";
         cout << endl;
+
         // Write an action using cout. DON'T FORGET THE "<< endl"
         // To debug: cerr << "Debug messages..." << endl;
 
         // WAIT | LINE <sourceIdx> <targetIdx> <strength> | BEACON <cellIdx> <strength> | MESSAGE <text>
     }
 }
-
-
-
-
-
