@@ -180,7 +180,7 @@ int main()
     vector<Cell> cells;
     int number_of_cells; // amount of hexagonal cells in this map
     cin >> number_of_cells; cin.ignore();
-	int total_b;
+
     for (int i = 0; i < number_of_cells; i++) {
         int type; // 0 for empty, 1 for eggs, 2 for crystal
         int initial_resources; // the initial amount of eggs/crystals on this cell
