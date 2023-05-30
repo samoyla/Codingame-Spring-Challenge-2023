@@ -344,3 +344,4 @@ for (int iteration = 0; iteration < 3; ++iteration) {
 
     cout << output << endl;
 }
+}
