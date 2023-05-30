@@ -172,19 +172,7 @@ vector<vector<int>> find_targets(const vector<Cell>& cells, int from, int target
     return all_targets;
 }
 
-void placeBeaconForEggs(int cell_index) {
-    Cell& cell = cells[cell_index];
-    int target_index = -1;
-    for (int neighbor_index : cell.neighbors) {
-        if (cells[neighbor_index].cell_type == 1) {
-            target_index = neighbor_index;
-            break;
-        }
-    }
-    if (target_index != -1) {
-        output += "BEACON " + to_string(target_index) + " " + to_string(str_egg) + ";";
-    }
-}
+
 
 
 int main()
@@ -278,36 +266,25 @@ while (1) {
 
     string output;
 
+
     // Phase 1: Collecting eggs
 int beacons_placed = 0;
 for (const auto& path : egg_paths) {
     for (int i = 1; i < path.size(); ++i) {
-        if (beacons_placed >= nb_my_ants / 2) {
+        if (beacons_placed > nb_my_ants / 2) {
             break; // Stop collecting eggs if beacons placed reach half of the ants count
         }
         output += "BEACON " + to_string(path[i - 1]) + " " + to_string(str_egg) + ";";
         beacons_placed++;
     }
-    if (beacons_placed >= nb_my_ants / 2) {
+    if (beacons_placed > nb_my_ants / 2) {
         break; // Stop collecting eggs if beacons placed reach half of the ants count
     }
 }
 
-// Place beacons for eggs if neighbors contain crystals
-if (beacons_placed < nb_my_ants / 2) {
-	for (int neighbor_index : neighbor_indices) {
-	    if (cells[neighbor_index].cell_type == 2) {
-		placeBeaconForEggs(neighbor_index);
-		beacons_placed++;
-		if (beacons_placed >= nb_my_ants / 2) {
-		    break;
-		}
-	    }
-	}
-}
 	
 // Phase 2: Collecting eggs and crystals
-for (int iteration = 0; iteration < 3; ++iteration) {
+for (int iteration = 0; iteration < 5; ++iteration) {
     vector<vector<int>> targets;
     if (iteration == 0) {
         targets = egg_paths; // Collect eggs
@@ -317,7 +294,7 @@ for (int iteration = 0; iteration < 3; ++iteration) {
 
     for (const auto& path : targets) {
         for (int i = 1; i < path.size(); ++i) {
-            if (beacons_placed >= nb_my_ants / 2) {
+            if (beacons_placed > nb_my_ants / 2) {
                 break; // Stop collecting resources if beacons placed reach half of the ants count
             }
             if (cells[path[i]].cell_type == 2 && str_crist > 0) {
@@ -328,10 +305,22 @@ for (int iteration = 0; iteration < 3; ++iteration) {
                 beacons_placed++;
             }
         }
-        if (beacons_placed >= nb_my_ants / 2) {
+        if (beacons_placed > nb_my_ants / 2) {
             break; // Stop collecting resources if beacons placed reach half of the ants count
         }
     }
+}
+
+
+    // Output the beacons or other instructions
+    if (!output.empty()) {
+        output.pop_back(); // Remove the trailing semicolon
+    } else {
+        output = "WAIT";
+    }
+
+    cout << output << endl;
+}
 }
 
 
