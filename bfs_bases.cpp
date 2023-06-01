@@ -202,6 +202,15 @@ int countEggs(const std::vector<Cell>& cells) {
     return eggCount;
 }
 
+int countTypeCells(const std::vector<Cell>& cells, int type) {
+    int count = 0;
+    for (const Cell& cell : cells) {
+        if (cell.cell_type == type) {
+            count++;
+        }
+    }
+    return count;
+}
 
 int main()
 {
