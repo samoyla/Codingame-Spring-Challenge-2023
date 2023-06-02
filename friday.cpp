@@ -13,7 +13,7 @@ using namespace std;
 #include <list>
 #include <map>
 #include <queue>
-
+//friday oops
 class Cell {
     public:
         int index;
@@ -39,6 +39,46 @@ typedef struct s_data{
 	int crystalCount;
 }t_data;
 
+vector<int> BFS_beacon(const vector<Cell>& cells, int start) {
+    int nb_cells = cells.size();
+    vector<bool> visited(nb_cells, false);
+    vector<int> distances(nb_cells, numeric_limits<int>::max());
+    vector<int> prev_node(nb_cells, -1);
+    distances[start] = 0;
+
+    queue<int> q;
+    q.push(start);
+
+    while (!q.empty()) {
+        int current = q.front();
+        q.pop();
+
+        if (cells[current].beacon == true) {
+            vector<int> path;
+            while (current != -1) {
+                path.insert(path.begin(), current);
+                current = prev_node[current];
+            }
+            
+            return path;
+        }
+
+        visited[current] = true;
+
+        for (int neighbor : cells[current].neighbors) {
+            if (!visited[neighbor]) {
+                int next_distance = distances[current] + 1;
+                if (next_distance < distances[neighbor]) {
+                    distances[neighbor] = next_distance;
+                    prev_node[neighbor] = current;
+                }
+                q.push(neighbor);
+            }
+        }
+    }
+    return vector<int>();
+}
+
 vector<int> BFS_shortest_path(const vector<Cell>& cells, int start, int target) {
     int nb_cells = cells.size();
     vector<bool> visited(nb_cells, false);
@@ -59,6 +99,7 @@ vector<int> BFS_shortest_path(const vector<Cell>& cells, int start, int target) 
                 path.insert(path.begin(), current);
                 current = prev_node[current];
             }
+            reverse(path.begin(), path.end());
             return path;
         }
 
@@ -201,15 +242,6 @@ vector<vector<int>> find_targets(const vector<Cell>& cells, vector<int> from, in
     return all_targets;
 }
 
-int countEggs(const std::vector<Cell>& cells) {
-    int eggCount = 0;
-    for (const Cell& cell : cells) {
-        if (cell.cell_type == 1) {
-            eggCount++;
-        }
-    }
-    return eggCount;
-}
 int countTypeCells(const std::vector<Cell>& cells, int type) {
     int count = 0;
     for (const Cell& cell : cells) {
@@ -224,21 +256,24 @@ int countTypeCells(const std::vector<Cell>& cells, int type) {
 
 //void    recursivelyPlaceBeacons(const std::vector<Cell>& cells, int node_index, int beacons_placed, int nb_my_ants) {
 void    recursivelyPlaceBeacons(std::vector<Cell>& cells, int node_index, string output, t_data &data) {
-    if (cells[node_index].cell_type > 0) {
+    if (cells[node_index].resources > 0) {
         if (!cells[node_index].beacon){
             data.beacons_placed++;
         }
-            output += "BEACON " + to_string(cells[node_index].index) + " 1;";
-            cells[node_index].beacon = true;
+        output += "BEACON " + to_string(cells[node_index].index) + " 1;";
+        //cerr << "recursive beacons = " << endl;
+        cells[node_index].beacon = true;
     }
     for (int neighbor : cells[node_index].neighbors) {
-        if (!cells[neighbor].beacon && cells[neighbor].cell_type > 0) {
+        if (!cells[neighbor].beacon && cells[neighbor].resources > 0) {
             recursivelyPlaceBeacons(cells, neighbor, output, data);
         }
     }
 }
 
-void    recursivelyPlaceBeacons(std::vector<Cell>& cells, int node_index, string output);
+//void    recursivelyPlaceBeacons(std::vector<Cell>& cells, int node_index, string output);
+
+#define DISPLAY_VECTOR 1
 
 int main()
 {
@@ -268,8 +303,8 @@ int main()
 	cerr << "data variables : " << endl;
 	cerr << "nb cells       : " << data.nb_cells << endl;
 	cerr << "beacons placed : " << data.beacons_placed << endl;
-	cerr << "begin crystals : " << data.crystalCount << endl;
-	cerr << "begin eggs     : " << data.eggCount << endl;
+	// cerr << "begin crystals : " << data.crystalCount << endl;
+	// cerr << "begin eggs     : " << data.eggCount << endl;
 	cerr << "my ant         : " << data.nb_my_ants << endl;
 	cerr << "opp ants       : " << data.nb_opp_ants << endl;
 
@@ -295,31 +330,31 @@ int main()
         vector<vector<int>> egg_paths = find_targets(cells, my_bases, 1);
         vector<vector<int>> crist_paths = find_targets(cells, my_bases, 2);
         t_data data = {number_of_cells, 0, 0, 0, countTypeCells(cells, 1), countTypeCells(cells, 2)};
+#if DISPLAY_VECTOR
+        cerr << "Egg Paths:" << endl;
+        for (const auto& path : egg_paths) {
+            for (const auto& cell : path) {
+                cerr << cell << " ";
+            }
+            cerr << endl;
+        }
 
-        // cerr << "Egg Paths:" << endl;
-        // for (const auto& path : egg_paths) {
-        //     for (const auto& cell : path) {
-        //         cerr << cell << " ";
-        //     }
-        //     cerr << endl;
-        // }
+        cerr << "Crist Paths:" << endl;
+        for (const auto& path : crist_paths) {
+            for (const auto& cell : path) {
+                cerr << cell << " ";
+            }
+            cerr << endl;
+        }
 
-        // cerr << "Crist Paths:" << endl;
-        // for (const auto& path : crist_paths) {
-        //     for (const auto& cell : path) {
-        //         cerr << cell << " ";
-        //     }
-        //     cerr << endl;
-        // }
-
-        // cerr << "ALL resources Paths:" << endl;
-        // for (const auto& path : all_res_paths) {
-        //     for (const auto& cell : path) {
-        //         cerr << cell << " ";
-        //     }
-        //     cerr << endl;
-        // }
-
+        cerr << "ALL resources Paths:" << endl;
+        for (const auto& path : all_res_paths) {
+            for (const auto& cell : path) {
+                cerr << cell << " ";
+            }
+            cerr << endl;
+        }
+#endif
         for (int i = 0; i < number_of_cells; i++) {
             int resources; // the current amount of eggs/crystals on this cell
             int my_ants; // the amount of your ants on this cell
@@ -332,29 +367,53 @@ int main()
             data.nb_my_ants += my_ants;
             data.nb_opp_ants += opp_ants;
         }
-        cerr << "data variables in while: " << endl;
+        // cerr << "data variables in while: " << endl;
      
-        cerr << "beacons placed : " << data.beacons_placed << endl;
-        cerr << "my ant         : " << data.nb_my_ants << endl;
-	    cerr << "opp ants       : " << data.nb_opp_ants << endl;
+        // cerr << "beacons placed : " << data.beacons_placed << endl;
+        // cerr << "my ant         : " << data.nb_my_ants << endl;
+	    // cerr << "opp ants       : " << data.nb_opp_ants << endl;
 
-        string output;
+         string output;
 
-        for (const auto& path : egg_paths) {
+        // for (int j = 0; j< all_res_paths.size(); ++j) {
+        //     //cerr << "beacon cond : " << (beacons_placed < nb_my_ants/2) << endl;
+        //     if (data.beacons_placed < data.nb_my_ants / 2){
+        //         for (int i = 0; i < all_res_paths[j].size(); ++i) {
+        //             //cerr << " path size = " << all_res_paths[j].size()<<endl;
+        //             if(!cells[i].beacon){
+        //                 data.beacons_placed++;          
+        //             }
+        //             output += "BEACON " + to_string(all_res_paths[j][i]) + " 1;";
+        //                 //cerr << "here beacons = " << endl; 
+        //             cells[i].beacon = true;
+                    
+        //         }
+        //         recursivelyPlaceBeacons(cells, all_res_paths[j][0], output, data);
+        //     }
+        // }
+        int stay_alive = 1;
+        for (unsigned int i = 0; i < my_bases.size(); i++)
+            cells[my_bases[i]].beacon = true;
+        for (int j = 0; j< all_res_paths.size() && stay_alive; ++j) {
+            vector<int> path = BFS_beacon(cells, all_res_paths[j][0]);
+            for (int i = 0; i < path.size(); ++i) {
             //cerr << "beacon cond : " << (beacons_placed < nb_my_ants/2) << endl;
-            if (data.beacons_placed < data.nb_my_ants / 2){
-                for (int i = 0; i < path.size(); ++i) {
-                    if(!cells[i].beacon){
-                        data.beacons_placed++;        
+                if (data.beacons_placed > data.nb_my_ants / 2){
+                    stay_alive = 0;
+                    break;
                     }
-                    output += "BEACON " + to_string(path[i]) + " 1;";
-                    cells[i].beacon = true;
-                    recursivelyPlaceBeacons(cells, path[i], output, data);
+                if(!cells[path[i]].beacon){
+                        data.beacons_placed++;          
+                    }
+                output += "BEACON " + to_string(all_res_paths[j][i]) + " 1;";
+                        //cerr << "here beacons = " << endl; 
+                cells[path[i]].beacon = true;
+                    
                 }
             }
-        }
 
-        cerr << "beacon places after : " << data.beacons_placed << endl;
+
+        // cerr << "beacon places after : " << data.beacons_placed << endl;
 
    //   Output the beacons or other instructions
         if (!output.empty()) {
