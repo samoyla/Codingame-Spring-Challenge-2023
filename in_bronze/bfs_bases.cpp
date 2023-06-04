@@ -69,7 +69,7 @@ vector<int> BFS_shortest_path(const vector<Cell>& cells, int start, int target) 
     return vector<int>();
 }
 
-vector<vector<int>> find_targets(const vector<Cell>& cells, const vector<int>& from, int target_type) {
+vector<vector<int>> find_all_targets(const vector<Cell>& cells, const vector<int>& from) {
     int nb_cells = cells.size();
     vector<bool> visited(nb_cells, false);
     vector<int> unvisited(nb_cells);
@@ -79,64 +79,11 @@ vector<vector<int>> find_targets(const vector<Cell>& cells, const vector<int>& f
     vector<int> distances(nb_cells, numeric_limits<int>::max());
     vector<int> prev_node(nb_cells, -1);
     
-    vector<vector<int>> all_targets;
-
     for (int start : from) {
         distances[start] = 0;
     }
-
-    while (!unvisited.empty()) {
-        int minDist = numeric_limits<int>::max();
-        int min_i = -1;
-
-        for (int a : unvisited) {
-            if (distances[a] < minDist) {
-                min_i = a;
-                minDist = distances[a];
-            }
-        }
-
-        int current = min_i;
-        visited[current] = true;
-
-        unvisited.erase(find(unvisited.begin(), unvisited.end(), current));
-
-        if (cells[current].cell_type == target_type && cells[current].resources > 0) {
-            vector<int> path = BFS_shortest_path(cells, from[0], current);
-            if (!path.empty()) {
-                all_targets.push_back(path);
-            }
-        }
-
-        int next_distance = distances[current] + 1;
-
-        for (int v : cells[current].neighbors) {
-            if (!visited[v]) {
-                if (distances[v] > next_distance) {
-                    distances[v] = next_distance;
-                    prev_node[v] = current;
-                }
-            }
-        }
-    }
-    return all_targets;
-}
-
-vector<vector<int>> find_targets(const vector<Cell>& cells, const vector<int>& from) {
-    int nb_cells = cells.size();
-    vector<bool> visited(nb_cells, false);
-    vector<int> unvisited(nb_cells);
-    for (int i = 0; i < nb_cells; ++i) {
-        unvisited[i] = i;
-    }
-    vector<int> distances(nb_cells, numeric_limits<int>::max());
-    vector<int> prev_node(nb_cells, -1);
     
     vector<vector<int>> all_targets;
-
-    for (int start : from) {
-        distances[start] = 0;
-    }
 
     while (!unvisited.empty()) {
         int minDist = numeric_limits<int>::max();
@@ -155,16 +102,78 @@ vector<vector<int>> find_targets(const vector<Cell>& cells, const vector<int>& f
         unvisited.erase(find(unvisited.begin(), unvisited.end(), current));
 
         if ((cells[current].cell_type == 1 || cells[current].cell_type == 2) && cells[current].resources > 0) {
-            vector<int> path;
+            vector<int> shortest_path;
+            int shortest_path_length = numeric_limits<int>::max();
             for (int start : from) {
-                vector<int> temp_path = BFS_shortest_path(cells, start, current);
-                if (!temp_path.empty()) {
-                    path = temp_path;
-                    break;
+                vector<int> path = BFS_shortest_path(cells, start, current);
+                if (!path.empty() && path.size() < shortest_path_length) {
+                    shortest_path = path;
+                    shortest_path_length = path.size();
                 }
             }
-            if (!path.empty()) {
-                all_targets.push_back(path);
+            if (!shortest_path.empty()) {
+                all_targets.push_back(shortest_path);
+            }
+        }
+
+        int next_distance = distances[current] + 1;
+
+        for (int v : cells[current].neighbors) {
+            if (!visited[v]) {
+                if (distances[v] > next_distance) {
+                    distances[v] = next_distance;
+                    prev_node[v] = current;
+                }
+            }
+        }
+    }
+    return all_targets;
+}
+
+//replace two functions :find_eggs and find_crist
+vector<vector<int>> find_targets(const vector<Cell>& cells, vector<int> from, int target_type) {
+    int nb_cells = cells.size();
+    vector<bool> visited(nb_cells, false);
+    vector<int> unvisited(nb_cells);
+    for (int i = 0; i < nb_cells; ++i) {
+        unvisited[i] = i;
+    }
+    vector<int> distances(nb_cells, numeric_limits<int>::max());
+    vector<int> prev_node(nb_cells, -1);
+       for (int start : from) {
+        distances[start] = 0;
+    }
+
+    vector<vector<int>> all_targets;
+
+    while (!unvisited.empty()) {
+        int minDist = numeric_limits<int>::max();
+        int min_i = -1;
+
+        for (int a : unvisited) {
+            if (distances[a] < minDist) {
+                min_i = a;
+                minDist = distances[a];
+            }
+        }
+
+        int current = min_i;
+        visited[current] = true;
+
+        unvisited.erase(find(unvisited.begin(), unvisited.end(), current));
+
+        if (cells[current].cell_type == target_type && cells[current].resources > 0) {
+            vector<int> shortest_path;
+            int shortest_path_length = numeric_limits<int>::max();
+            for (int start : from) {
+                vector<int> path = BFS_shortest_path(cells, start, current);
+                if (!path.empty() && path.size() < shortest_path_length) {
+                    shortest_path = path;
+                    shortest_path_length = path.size();
+                }
+            }
+            if (!shortest_path.empty()) {
+                all_targets.push_back(shortest_path);
             }
         }
 
@@ -183,6 +192,25 @@ vector<vector<int>> find_targets(const vector<Cell>& cells, const vector<int>& f
     return all_targets;
 }
 
+int countEggs(const std::vector<Cell>& cells) {
+    int eggCount = 0;
+    for (const Cell& cell : cells) {
+        if (cell.cell_type == 1) {
+            eggCount++;
+        }
+    }
+    return eggCount;
+}
+
+int countTypeCells(const std::vector<Cell>& cells, int type) {
+    int count = 0;
+    for (const Cell& cell : cells) {
+        if (cell.cell_type == type) {
+            count++;
+        }
+    }
+    return count;
+}
 
 int main()
 {
@@ -224,9 +252,12 @@ int main()
         cin >> opp_base_index; cin.ignore();
         opp_bases.push_back(opp_base_index);
     }
+
+    int nb_egg_c = countEggs(cells);
+    cerr << "number of egg cells = " << nb_egg_c << endl;
 	
 while (1) {
-    vector<vector<int>> all_res_paths = find_targets(cells, my_bases);
+    vector<vector<int>> all_res_paths = find_all_targets(cells, my_bases);
     vector<vector<int>> egg_paths = find_targets(cells, my_bases, 1);
     vector<vector<int>> crist_paths = find_targets(cells, my_bases, 2);
 
@@ -286,8 +317,8 @@ while (1) {
     int beacons_placed = 0;
     //cerr << "beacon places before : " << beacons_placed << endl;
     int count = 1;
-    // for (const auto& path : all_res_paths) {
-    for (const auto& path : egg_paths) {
+    if(!egg_paths.empty()){
+        for (const auto& path : egg_paths) {
         //cerr << "beacon cond : " << (beacons_placed < nb_my_ants/2) << endl;
         if (beacons_placed < nb_my_ants / 2){
             for (int i = 0; i < path.size(); ++i) {
@@ -296,13 +327,16 @@ while (1) {
                 }
                 output += "BEACON " + to_string(path[i]) + " 1;";
                 cells[i].beacon = true;
+                }
             }
+            // count++;
+            // if (count > 5)
+            // break ;
         }
-        count++;
-        if (count > 2)
-            break ;
     }
-    //for (const auto& path : all_res_paths) {
+    else
+    {
+      //for (const auto& path : all_res_paths) {
     for (const auto& path : crist_paths) {
        // cerr << "beacon cond : " << (beacons_placed < nb_my_ants/2) << endl;
         if (beacons_placed < nb_my_ants / 2){
@@ -312,35 +346,11 @@ while (1) {
                 }
                 output += "BEACON " + to_string(path[i]) + " 1;";
                 cells[i].beacon = true;
+                }
             }
-        }
+        }  
     }
-    //Collecting eggs and crystals
-    // for (int iteration = 0; iteration < 3; ++iteration) {
-    //     vector<vector<int>> targets;
-    //     if (iteration == 0) {
-    //         targets = egg_paths; // Collect eggs
-    //     } else {
-    //         targets = all_res_paths; // Collect both eggs and crystals
-    //     }
 
-    //     for (const auto& path : targets) {
-    //         if (beacons_placed < nb_my_ants / 2){
-    //             for (int i = 1; i < path.size(); ++i) {
-    //                                 if(!cells[i].beacon){
-    //                 beacons_placed++;        
-    //             }
-    //                 if (cells[path[i]].cell_type == 2) {
-    //                     output += "BEACON " + to_string(path[i - 1]) + " 1;";
-    //                     cells[i].beacon = true;
-    //                 } else if (cells[path[i]].cell_type == 1) {
-    //                     output += "BEACON " + to_string(path[i - 1]) + " 1;";
-    //                     cells[i].beacon = true;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
     //cerr << "beacon places after : " << beacons_placed << endl;
 
         // Output the beacons or other instructions
